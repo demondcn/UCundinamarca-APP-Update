@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
-  Button,
   Image,
   Alert,
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { auth, db, storage } from "../firebase/config";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
@@ -22,22 +21,38 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
   const user = auth.currentUser;
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (user) {
-        const docRef = doc(db, "usuarios", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
-        } else {
-          console.log("No se encontró el documento.");
-        }
+  const fetchUserData = async () => {
+    if (!user) return;
+    try {
+      const docRef = doc(db, "usuarios", user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setUserData(docSnap.data());
+      } else {
+        console.log("No se encontró el documento.");
       }
-    };
+    } catch (error) {
+      console.error("Error al obtener datos del usuario:", error.message);
+      Alert.alert("Error", "No se pudieron cargar los datos del usuario.");
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserData();
+    }, [])
+  );
+
+  useEffect(() => {
     fetchUserData();
   }, [user]);
 
   const handleImageConfig = async () => {
+    if (!user) {
+      Alert.alert("Error", "Usuario no autenticado.");
+      return;
+    }
+
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -74,11 +89,9 @@ export default function ProfileScreen() {
     }
   };
 
-  // Dentro de tu ProfileScreen
-
   const handleLogout = async () => {
     try {
-      await auth.signOut(); // ¡Listo! No necesitas navegar manualmente
+      await auth.signOut();
     } catch (error) {
       Alert.alert("Error al cerrar sesión", error.message);
     }
@@ -87,36 +100,40 @@ export default function ProfileScreen() {
   if (!userData) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#000" />
-        <Text>Cargando perfil...</Text>
+        <ActivityIndicator size="large" color="#007BFF" />
+        <Text style={styles.loadingText}></Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>👤 Perfil de Usuario</Text>
-      <Text style={styles.label}>Email: {userData.email}</Text>
-      <Text style={styles.label}>Nombres: {userData.nombres}</Text>
-      <Text style={styles.label}>Apellidos: {userData.apellidos}</Text>
-      <Text style={styles.label}>Universidad: {userData.universidad}</Text>
-
-      <TouchableOpacity onPress={handleImageConfig} style={styles.imageButton}>
+      <Text style={styles.title}>
+        {userData.nombres} {userData.apellidos}
+      </Text>
+      <TouchableOpacity
+        onPress={loading ? null : handleImageConfig}
+        style={styles.imageButton}
+        disabled={loading}
+      >
         <Image
-          source={{
-            uri:
-              imageUri ||
-              userData.imageUrl ||
-              "https://cdn-icons-png.flaticon.com/128/149/149071.png",
-          }}
+          source={require("../assets/user_udec.png")} // Imagen fija
           style={styles.avatar}
         />
-        <Text style={styles.imageButtonText}>Toca para cambiar la imagen</Text>
       </TouchableOpacity>
-
-      <View style={{ marginTop: 30 }}>
-        <Button title="Cerrar sesión" color="red" onPress={handleLogout} />
+      <View style={styles.infoContainer}>
+        <Text style={styles.label}>{userData.email}</Text>
+        <Text style={styles.label}>{userData.universidad}</Text>
       </View>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("ConfigProfileScreen")}
+        style={styles.configButton}
+      >
+        <Text style={styles.configButtonText}>Configurar Perfil</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+        <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -125,34 +142,75 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
+    backgroundColor: "#f9f9f9",
+    justifyContent: "center",
+    alignItems: "center",
   },
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#f9f9f9",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#555",
+    fontWeight: "bold",
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     marginBottom: 20,
+    textAlign: "center",
+    color: "#00482B",
+    fontWeight: "bold",
   },
   label: {
     fontSize: 16,
-    marginBottom: 4,
+    marginBottom: 5,
+    textAlign: "center",
+    color: "#555",
   },
   avatar: {
     width: 150,
     height: 150,
     borderRadius: 75,
-    alignSelf: "center",
-    marginVertical: 10,
+    borderWidth: 3,
+    borderColor: "#ddd",
+    marginBottom: 20,
   },
   imageButton: {
     alignItems: "center",
     marginBottom: 20,
   },
-  imageButtonText: {
-    textAlign: "center",
-    color: "#2196F3",
-    marginTop: 8,
+  infoContainer: {
+    marginTop: 10,
+    alignItems: "center",
+  },
+  logoutButton: {
+    backgroundColor: "#f9f9f9",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 30,
+  },
+  logoutButtonText: {
+    color: "#00482B",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  configButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#00482B",
+    borderRadius: 5,
+    paddingEnd: 80,
+    paddingStart: 80,
+  },
+  configButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

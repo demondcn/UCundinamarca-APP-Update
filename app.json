@@ -18,12 +18,17 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff",
-        "package" : "com.company.UCundinamarca"
-      }
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.kiddaby07.UCundinamarca"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "75f1b258-a31e-4128-abb4-4dad11f28644"
+      }
     }
   }
 }

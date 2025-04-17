@@ -4,22 +4,26 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   StyleSheet,
   Image,
   ScrollView,
+  Modal,
 } from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/config";
+import { Ionicons } from "@expo/vector-icons"; // Asegúrate de tener instalado @expo/vector-icons
 
 export default function SignupScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // Nuevo estado para la confirmación de contraseña
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [nombres, setNombres] = useState("");
   const [apellidos, setApellidos] = useState("");
   const [universidad, setUniversidad] = useState("");
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSignup = async () => {
     if (
@@ -55,8 +59,7 @@ export default function SignupScreen({ navigation }) {
         imageUrl: "https://cdn-icons-png.flaticon.com/128/8861/8861125.png",
       });
 
-      Alert.alert("Cuenta creada exitosamente");
-      navigation.navigate("Login"); // Redirige al login después de crear la cuenta
+      setSuccessModalVisible(true);
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
         Alert.alert("Error", "Este correo electrónico ya está registrado.");
@@ -69,14 +72,12 @@ export default function SignupScreen({ navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.innerContainer}>
-        {/* Logo */}
         <Image
-          source={require("../assets/udec-logo.png")} // Cambié la forma de cargar la imagen
+          source={require("../assets/udec-logo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
 
-        {/* Nombres input */}
         <TextInput
           style={styles.input}
           placeholder="Nombre completo"
@@ -84,7 +85,6 @@ export default function SignupScreen({ navigation }) {
           onChangeText={setNombres}
         />
 
-        {/* Apellidos input */}
         <TextInput
           style={styles.input}
           placeholder="Apellidos"
@@ -92,7 +92,6 @@ export default function SignupScreen({ navigation }) {
           onChangeText={setApellidos}
         />
 
-        {/* Universidad input */}
         <TextInput
           style={styles.input}
           placeholder="Universidad"
@@ -100,7 +99,6 @@ export default function SignupScreen({ navigation }) {
           onChangeText={setUniversidad}
         />
 
-        {/* Correo electrónico input */}
         <TextInput
           style={styles.input}
           placeholder="Correo electrónico"
@@ -110,37 +108,82 @@ export default function SignupScreen({ navigation }) {
           autoCapitalize="none"
         />
 
-        {/* Contraseña input */}
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Contraseña"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeIcon}
+          >
+            <Ionicons
+              name={showPassword ? "eye-off" : "eye"}
+              size={24}
+              color="#888"
+            />
+          </TouchableOpacity>
+        </View>
 
-        {/* Confirmar contraseña input */}
-        <TextInput
-          style={styles.input}
-          placeholder="Confirmar contraseña"
-          value={confirmPassword} // Vinculé el estado de confirmar contraseña
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Confirmar contraseña"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!showConfirmPassword}
+          />
+          <TouchableOpacity
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            style={styles.eyeIcon}
+          >
+            <Ionicons
+              name={showConfirmPassword ? "eye-off" : "eye"}
+              size={24}
+              color="#888"
+            />
+          </TouchableOpacity>
+        </View>
 
-        {/* Register button */}
         <TouchableOpacity style={styles.button} onPress={handleSignup}>
-          <Text style={styles.buttonText}>Registrarse</Text>
+          <Text style={styles.buttonText}>Registrar</Text>
         </TouchableOpacity>
 
-        {/* Link to login screen */}
         <View style={styles.linkContainer}>
-          <Text style={styles.link}>¿Ya tienes cuenta?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-            <Text style={styles.link}>Iniciar sesión</Text>
+          <Text style={styles.text_link}>¿Ya tienes cuenta?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("LoginScreen")}>
+            <Text style={styles.link}> Inicia sesión</Text>
           </TouchableOpacity>
         </View>
       </View>
+
+      <Modal
+        visible={successModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSuccessModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>¡Cuenta creada exitosamente!</Text>
+            <Text style={styles.modalMessage}>
+              Bienvenido a la App UCundinamarca
+            </Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                setSuccessModalVisible(false);
+                navigation.navigate("LoginScreen");
+              }}
+            >
+              <Text style={styles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -148,28 +191,21 @@ export default function SignupScreen({ navigation }) {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: "center", // Centrado vertical
-    alignItems: "center", // Centrado horizontal
-    paddingHorizontal: 32, // Espaciado interno en los lados
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 32,
     backgroundColor: "#FFFFFF",
   },
   innerContainer: {
     width: "100%",
-    justifyContent: "center", // Centrado vertical
-    alignItems: "center", // Centrado horizontal
-    paddingVertical: 48, // Espaciado vertical
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 48,
   },
   logo: {
     width: 145,
     height: 138,
     marginBottom: 32,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-    color: "#00482B", // Color del título
   },
   input: {
     width: "100%",
@@ -182,10 +218,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 16,
   },
+  passwordContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    borderColor: "#dbdbdb",
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: "#fafafa",
+  },
+  passwordInput: {
+    flex: 1,
+    height: 50,
+    paddingHorizontal: 16,
+    fontSize: 16,
+  },
+  eyeIcon: {
+    paddingHorizontal: 10,
+  },
   button: {
     width: "100%",
     height: 50,
-    backgroundColor: "#00482B", // Verde similar a tu ejemplo
+    backgroundColor: "#00482B",
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
@@ -197,13 +252,49 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   linkContainer: {
-    flexDirection: "row", // Alineación horizontal
-    justifyContent: "center", // Centrado horizontal
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 24,
   },
   link: {
-    color: "#888888",
+    color: "#41A317",
     fontSize: 14,
-    marginRight: 5, // Espacio entre el texto "¿Ya tienes cuenta?" y el enlace "Iniciar sesión"
+    marginRight: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#00482B",
+  },
+  modalMessage: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+    color: "#333333",
+  },
+  modalButton: {
+    backgroundColor: "#00482B",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  modalButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

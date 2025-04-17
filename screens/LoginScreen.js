@@ -4,87 +4,120 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   StyleSheet,
   Image,
+  Alert,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/config";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Por favor, completa todos los campos.");
+      Alert.alert("Error", "Por favor, completa todos los campos.");
       return;
     }
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        // Auth state se maneja globalmente
-      })
-      .catch((error) => Alert.alert("Error", error.message));
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      Alert.alert("Error", "Correo o contraseña incorrectos.");
+    }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.innerContainer}>
-        {/* Logo */}
-        <Image
-          source={require("../assets/udec-logo.png")} // Cambia esto por el logo de tu app
-          style={styles.logo}
-          resizeMode="contain"
-        />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.innerContainer}>
+            <Image
+              source={require("../assets/udec-logo.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
 
-        {/* Email input */}
-        <TextInput
-          style={styles.input}
-          placeholder="Correo electrónico"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
+            <TextInput
+              style={styles.input}
+              placeholder="Correo electrónico"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
 
-        {/* Password input */}
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Contraseña"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeIcon}
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={24}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            </View>
 
-        {/* Login button */}
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Iniciar sesion</Text>
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+              <Text style={styles.buttonText}>Iniciar Sesión</Text>
+            </TouchableOpacity>
 
-        {/* Signup link */}
-        <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-          <Text style={styles.link}>¿No tienes cuenta? Crear una</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("ForgotPasswordScreen")}
+            >
+              <Text style={styles.forgotPasswordText}>
+                ¿Olvidaste tu contraseña?
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.linkContainer}>
+              <Text style={styles.text_link}>¿No tienes cuenta?</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("SignupScreen")}
+              >
+                <Text style={styles.link}> Regístrate</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: "center", // Centrado vertical
-    alignItems: "center", // Centrado horizontal
-    paddingHorizontal: 32, // Espaciado interno en los lados
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 32,
     backgroundColor: "#FFFFFF",
   },
   innerContainer: {
     width: "100%",
-    justifyContent: "center", // Centrado vertical
-    alignItems: "center", // Centrado horizontal
-    paddingVertical: 48, // Espaciado vertical
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 48,
   },
   logo: {
     width: 145,
@@ -102,10 +135,37 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     fontSize: 16,
   },
+  passwordContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    borderColor: "#dbdbdb",
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: "#fafafa",
+  },
+  passwordInput: {
+    flex: 1,
+    height: 50,
+    paddingHorizontal: 16,
+    fontSize: 16,
+  },
+  eyeIcon: {
+    paddingHorizontal: 10,
+  },
+  forgotPasswordText: {
+    color: "#41A317",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 16,
+    textAlign: "right",
+    alignSelf: "flex-end",
+  },
   button: {
     width: "100%",
     height: 50,
-    backgroundColor: "#00482B", // Verde similar a tu ejemplo
+    backgroundColor: "#00482B",
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
@@ -116,10 +176,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  link: {
-    color: "#888888",
-    fontSize: 14,
+  linkContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 24,
-    textAlign: "center",
+  },
+  text_link: {
+    fontSize: 14,
+    color: "#555",
+  },
+  link: {
+    color: "#41A317",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
