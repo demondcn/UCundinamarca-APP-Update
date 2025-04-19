@@ -33,13 +33,13 @@ export default function AttendanceScreen() {
     { title: "Evaluación Final", key: "Modulo11" },
     { title: "Clausura y Entrega de Reconocimientos", key: "Modulo12" },
   ];
-
+  // Cambia el estado de la sección activa
   const toggleSection = (index) => {
     const updatedSections = [...activeSections];
     updatedSections[index] = !updatedSections[index];
     setActiveSections(updatedSections);
   };
-
+  // Cambia el estado del formulario
   const handleInputChange = (module, field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -49,7 +49,7 @@ export default function AttendanceScreen() {
       },
     }));
   };
-
+  // Button click, para los fomularios
   const handleSave = async (moduleKey, moduleTitle) => {
     const data = formData[moduleKey];
     if (
@@ -84,7 +84,7 @@ export default function AttendanceScreen() {
 
   const renderModule = (section, index) => {
     const data = formData[section.key] || {};
-
+    // Renderizar cada módulo con su respectivo formulario
     return (
       <View key={section.key} style={styles.accordionContainer}>
         <TouchableOpacity
@@ -139,7 +139,7 @@ export default function AttendanceScreen() {
       </View>
     );
   };
-
+  // Render main componente
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Registro de Asistencia</Text>

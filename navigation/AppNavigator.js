@@ -4,7 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/LoginScreen";
 import SignupScreen from "../screens/SignupScreen";
-import TabNavigator from "./TabNavigator"; // Asegúrate de que TabNavigator esté correctamente configurado
+import TabNavigator from "./TabNavigator";
 import ConfigProfileScreen from "../screens/ConfigProfileScreen";
 import { auth } from "../firebase/config";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
@@ -27,7 +27,7 @@ export default function AppNavigator() {
       }
     );
 
-    return unsubscribe; // Limpiar el listener cuando el componente se desmonte
+    return unsubscribe; 
   }, []);
 
   if (loading) {
@@ -56,7 +56,7 @@ export default function AppNavigator() {
             <Stack.Screen
               name="ConfigProfileScreen"
               component={ConfigProfileScreen}
-              options={{ headerShown: true, title: "Configurar Perfil" }} // Opcional: Mostrar encabezado
+              options={{ headerShown: true, title: "Configurar Perfil" }}
             />
           </>
         ) : (

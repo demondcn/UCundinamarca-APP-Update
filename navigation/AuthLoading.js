@@ -17,7 +17,7 @@ export default function AuthLoading() {
       }
     });
 
-    return unsubscribe; // Limpiar el listener cuando el componente se desmonte
+    return unsubscribe; 
   }, [navigation]);
 
   return (

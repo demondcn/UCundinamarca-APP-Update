@@ -21,6 +21,7 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
   const user = auth.currentUser;
 
+  // Verifica si el usuario está autenticado
   const fetchUserData = async () => {
     if (!user) return;
     try {
@@ -36,17 +37,17 @@ export default function ProfileScreen() {
       Alert.alert("Error", "No se pudieron cargar los datos del usuario.");
     }
   };
-
+  // Carga los datos del usuario al abrir la pantalla
   useFocusEffect(
     useCallback(() => {
       fetchUserData();
     }, [])
   );
-
+  // Carga los datos del usuario al cambiar de pantalla
   useEffect(() => {
     fetchUserData();
   }, [user]);
-
+  // Configura la imagen del perfil
   const handleImageConfig = async () => {
     if (!user) {
       Alert.alert("Error", "Usuario no autenticado.");
@@ -88,7 +89,7 @@ export default function ProfileScreen() {
       }
     }
   };
-
+  // Cierra sesión del usuario
   const handleLogout = async () => {
     try {
       await auth.signOut();
@@ -96,7 +97,7 @@ export default function ProfileScreen() {
       Alert.alert("Error al cerrar sesión", error.message);
     }
   };
-
+  // Verifica si el usuario está autenticado
   if (!userData) {
     return (
       <View style={styles.centered}>
@@ -117,7 +118,7 @@ export default function ProfileScreen() {
         disabled={loading}
       >
         <Image
-          source={require("../assets/user_udec.png")} // Imagen fija
+          source={require("../assets/user_udec.png")} 
           style={styles.avatar}
         />
       </TouchableOpacity>

@@ -33,7 +33,7 @@ export default function ForgotPasswordScreen({ navigation }) {
       await sendPasswordResetEmail(auth, email);
 
       // Verificar si el correo existe en la colección "usuarios" en Firestore
-      const usersRef = collection(db, "usuarios"); // Cambia "usuarios" si tu colección tiene otro nombre
+      const usersRef = collection(db, "usuarios"); 
       const q = query(usersRef, where("email", "==", email));
       const querySnapshot = await getDocs(q);
 

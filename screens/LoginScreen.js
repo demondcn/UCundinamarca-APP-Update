@@ -22,6 +22,7 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  // Manejo del estado de carga
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Por favor, completa todos los campos.");

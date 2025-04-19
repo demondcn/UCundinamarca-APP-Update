@@ -106,6 +106,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   scrollView: {
-    marginBottom: 10, // Agregar un margen inferior
+    marginBottom: 10, 
   },
 });

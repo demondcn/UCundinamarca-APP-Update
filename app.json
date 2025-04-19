@@ -16,11 +16,12 @@
       "supportsTablet": true
     },
     "android": {
+      "package":"com.kiddaby07.UCundinamarca",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/udec-logo.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.kiddaby07.UCundinamarca"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"

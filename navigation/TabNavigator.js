@@ -12,7 +12,7 @@ import HomeScreen from "../screens/HomeScreen";
 import LiveScreen from "../screens/LiveScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import ConfigProfileScreen from "../screens/ConfigProfileScreen";
-import AttendanceScreen from "../screens/AttendanceScreen"; // Importa la nueva pantalla
+import AttendanceScreen from "../screens/AttendanceScreen"; 
 import { Ionicons } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
@@ -38,13 +38,13 @@ export default function TabNavigator() {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       () => {
-        setIsKeyboardVisible(true); // Cuando el teclado aparece
+        setIsKeyboardVisible(true);
       }
     );
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
       () => {
-        setIsKeyboardVisible(false); // Cuando el teclado desaparece
+        setIsKeyboardVisible(false);
       }
     );
 
@@ -67,7 +67,7 @@ export default function TabNavigator() {
               borderTopEndRadius: 20,
               borderTopStartRadius: 20,
               height: 60,
-              display: isKeyboardVisible ? "none" : "flex", // Controlamos la visibilidad
+              display: isKeyboardVisible ? "none" : "flex", 
             },
             tabBarIcon: ({ focused, color, size }) => {
               let iconName;

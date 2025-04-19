@@ -20,7 +20,7 @@ export default function ConfigProfileScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const user = auth.currentUser;
-
+  // Verifica si el usuario está autenticado
   useEffect(() => {
     if (!user) {
       Alert.alert(
@@ -53,7 +53,7 @@ export default function ConfigProfileScreen({ navigation }) {
 
     fetchUserData();
   }, [user, navigation]);
-
+    // Verifica si el usuario está autenticado
   const handleUpdateProfile = async () => {
     if (!nombres.trim() || !apellidos.trim() || !universidad.trim()) {
       Alert.alert("Por favor, completa todos los campos.");
@@ -77,7 +77,7 @@ export default function ConfigProfileScreen({ navigation }) {
       setLoading(false);
     }
   };
-
+  // Verifica si los datos están cargando
   if (isLoading) {
     // Muestra un indicador de carga mientras se cargan los datos
     return (
@@ -87,7 +87,7 @@ export default function ConfigProfileScreen({ navigation }) {
       </View>
     );
   }
-
+    // Renderiza el formulario de configuración del perfil
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>

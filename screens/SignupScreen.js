@@ -12,7 +12,7 @@ import {
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/config";
-import { Ionicons } from "@expo/vector-icons"; // Asegúrate de tener instalado @expo/vector-icons
+import { Ionicons } from "@expo/vector-icons"; 
 
 export default function SignupScreen({ navigation }) {
   const [email, setEmail] = useState("");
