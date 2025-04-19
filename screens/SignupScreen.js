@@ -9,10 +9,10 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/config";
-import { Ionicons } from "@expo/vector-icons"; 
+import { Ionicons } from "@expo/vector-icons";
 
 export default function SignupScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -22,6 +22,8 @@ export default function SignupScreen({ navigation }) {
   const [apellidos, setApellidos] = useState("");
   const [universidad, setUniversidad] = useState("");
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -34,16 +36,26 @@ export default function SignupScreen({ navigation }) {
       !universidad ||
       !confirmPassword
     ) {
-      Alert.alert("Por favor, completa todos los campos.");
+      setErrorMessage("Por favor, completa todos los campos.");
+      setErrorModalVisible(true);
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert("Las contraseñas no coinciden.");
+      setErrorMessage("Las contraseñas no coinciden.");
+      setErrorModalVisible(true);
       return;
     }
 
     try {
+      // Verificar si el correo ya está registrado
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+      if (signInMethods.length > 0) {
+        setErrorMessage("Este correo electrónico ya está registrado.");
+        setErrorModalVisible(true);
+        return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -56,16 +68,14 @@ export default function SignupScreen({ navigation }) {
         nombres,
         apellidos,
         universidad,
-        imageUrl: "https://cdn-icons-png.flaticon.com/128/8861/8861125.png",
+        imageUrl: "https://i.pinimg.com/736x/0e/41/af/0e41af633980095e707d482b04f8c5e9.jpg",
       });
 
       setSuccessModalVisible(true);
     } catch (error) {
-      if (error.code === "auth/email-already-in-use") {
-        Alert.alert("Error", "Este correo electrónico ya está registrado.");
-      } else {
-        Alert.alert("Error", error.message);
-      }
+      // Mostrar un mensaje genérico de error para el usuario
+      setErrorMessage("Ocurrió un error al registrar la cuenta. Por favor, inténtalo de nuevo.");
+      setErrorModalVisible(true);
     }
   };
 
@@ -160,6 +170,7 @@ export default function SignupScreen({ navigation }) {
         </View>
       </View>
 
+      {/* Modal de éxito */}
       <Modal
         visible={successModalVisible}
         transparent
@@ -178,6 +189,27 @@ export default function SignupScreen({ navigation }) {
                 setSuccessModalVisible(false);
                 navigation.navigate("LoginScreen");
               }}
+            >
+              <Text style={styles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de error */}
+      <Modal
+        visible={errorModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setErrorModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Error</Text>
+            <Text style={styles.modalMessage}>{errorMessage}</Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setErrorModalVisible(false)}
             >
               <Text style={styles.modalButtonText}>OK</Text>
             </TouchableOpacity>

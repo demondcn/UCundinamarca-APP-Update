@@ -29,6 +29,7 @@ export default function ProfileScreen() {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setUserData(docSnap.data());
+        setImageUri(docSnap.data().imageUrl || null); // Carga la imagen inicial
       } else {
         console.log("No se encontró el documento.");
       }
@@ -37,16 +38,19 @@ export default function ProfileScreen() {
       Alert.alert("Error", "No se pudieron cargar los datos del usuario.");
     }
   };
+
   // Carga los datos del usuario al abrir la pantalla
   useFocusEffect(
     useCallback(() => {
       fetchUserData();
     }, [])
   );
+
   // Carga los datos del usuario al cambiar de pantalla
   useEffect(() => {
     fetchUserData();
   }, [user]);
+
   // Configura la imagen del perfil
   const handleImageConfig = async () => {
     if (!user) {
@@ -63,7 +67,7 @@ export default function ProfileScreen() {
 
     if (!result.canceled) {
       const uri = result.assets[0].uri;
-      setImageUri(uri);
+      setImageUri(uri); // Actualiza la imagen inmediatamente
       setLoading(true);
 
       try {
@@ -89,6 +93,7 @@ export default function ProfileScreen() {
       }
     }
   };
+
   // Cierra sesión del usuario
   const handleLogout = async () => {
     try {
@@ -97,6 +102,7 @@ export default function ProfileScreen() {
       Alert.alert("Error al cerrar sesión", error.message);
     }
   };
+
   // Verifica si el usuario está autenticado
   if (!userData) {
     return (
@@ -118,7 +124,11 @@ export default function ProfileScreen() {
         disabled={loading}
       >
         <Image
-          source={require("../assets/user_udec.png")} 
+          source={
+            imageUri
+              ? { uri: imageUri } // Usa la imagen seleccionada o cargada
+              : require("../assets/user_udec.png") // Imagen predeterminada
+          }
           style={styles.avatar}
         />
       </TouchableOpacity>
